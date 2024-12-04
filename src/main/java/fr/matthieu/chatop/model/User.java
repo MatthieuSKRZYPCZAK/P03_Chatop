@@ -1,9 +1,8 @@
 package fr.matthieu.chatop.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.Data;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -21,6 +20,7 @@ public class User implements UserDetails {
 	private Long id;
 
 	@Column(unique = true, nullable = false)
+	@Email
 	private String email;
 
 	@Column(nullable = false)
@@ -29,11 +29,9 @@ public class User implements UserDetails {
 	@Column(nullable = false)
 	private String name;
 
-	@CreatedDate
 	@Column(name="created_at")
 	private LocalDateTime createdAt;
 
-	@LastModifiedDate
 	@Column(name="updated_at")
 	private LocalDateTime updatedAt;
 
@@ -47,4 +45,24 @@ public class User implements UserDetails {
 	public String getUsername() {
 		return email;
 	}
+
+	@PrePersist
+	public void prePersist() {
+		this.createdAt = LocalDateTime.now();
+		this.updatedAt = null;
+		normalizeEmail();
+	}
+
+	@PreUpdate
+	public void preUpdate() {
+		this.updatedAt = LocalDateTime.now();
+		normalizeEmail();
+	}
+
+	private void normalizeEmail() {
+		if(this.email != null) {
+			this.email = this.email.toLowerCase();
+		}
+	}
+
 }
