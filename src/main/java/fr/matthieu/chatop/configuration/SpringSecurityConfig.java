@@ -44,8 +44,8 @@ public class SpringSecurityConfig {
 						.requestMatchers(
 								REGISTER_URL,
 								LOGIN_URL,
-								API_DOCS_URL,
-								SWAGGER_UI_URL
+								API_DOCS_URL+"/**",
+								SWAGGER_UI_URL+"/**"
 								).permitAll()
 						.anyRequest().authenticated());
 		http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
