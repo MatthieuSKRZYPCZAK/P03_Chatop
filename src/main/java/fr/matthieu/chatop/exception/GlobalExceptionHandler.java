@@ -8,6 +8,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,10 +59,10 @@ public class GlobalExceptionHandler {
 	 * @return A {@link ResponseEntity} with an error message and HTTP status 401 (Unauthorized).
 	 */
 	@ExceptionHandler(BadCredentialsException.class)
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	public ResponseEntity<Object> handleBadCredentials(BadCredentialsException e) {
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 				.body(new ErrorResponse(ResponseMessages.INVALID_CREDENTIALS));
 	}
-
 
 }
