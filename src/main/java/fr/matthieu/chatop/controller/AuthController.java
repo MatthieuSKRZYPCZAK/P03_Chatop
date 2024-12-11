@@ -8,6 +8,12 @@ import fr.matthieu.chatop.common.ErrorResponse;
 import fr.matthieu.chatop.model.User;
 import fr.matthieu.chatop.service.JWTService;
 import fr.matthieu.chatop.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +34,7 @@ import static fr.matthieu.chatop.common.ApiRoutes.*;
  */
 @Slf4j
 @RestController
+@Tag(name = "Authentication", description = "Endpoints for user authentication and management")
 public class AuthController {
 
 	public JWTService jwtService;
@@ -49,6 +56,22 @@ public class AuthController {
 	 *         or an error response with status 401 if authentication fails.
 	 */
 	@PostMapping(LOGIN_URL)
+	@Operation(
+			summary = "User login",
+			description = "Authenticates a user with their credentials and returns a JWT token if the login is successful.",
+			responses = {
+					@ApiResponse(
+							responseCode = "200",
+							description = "Successful authentication. Returns a JWT token.",
+							content = @Content(mediaType = "application/json", schema = @Schema(implementation = AuthenticationDTO.class))
+					),
+					@ApiResponse(
+							responseCode = "401",
+							description = "Unauthorized. Invalid username or password.",
+							content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+					)
+			}
+	)
 	public ResponseEntity<Object> login(@RequestBody AuthenticationDTO authenticationDTO) {
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(authenticationDTO.username(), authenticationDTO.password())
@@ -72,6 +95,22 @@ public class AuthController {
 	 *         or an error response with status 400 if registration fails.
 	 */
 	@PostMapping(REGISTER_URL)
+	@Operation(
+			summary = "User registration",
+			description = "Registers a new user and returns a JWT token for the newly created account.",
+			responses = {
+					@ApiResponse(
+							responseCode = "200",
+							description = "Successful registration. Returns a JWT token.",
+							content = @Content(mediaType = "application/json", schema = @Schema(implementation = RegisterDTO.class))
+					),
+					@ApiResponse(
+							responseCode = "400",
+							description = "Bad Request. Registration failed due to invalid data.",
+							content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+					)
+			}
+	)
 	public ResponseEntity<Object> register(@Valid @RequestBody RegisterDTO registerDTO) {
 		log.info("Registering new user");
 		String token = userService.register(registerDTO);
@@ -87,16 +126,33 @@ public class AuthController {
 	 * Retrieves the currently authenticated user's information.
 	 *
 	 * @return A {@link ResponseEntity} containing the user's information if authenticated,
-	 *         or an error response with status 400 if the user is not authenticated.
+	 *         or an error response with status 401 if the user is not authenticated.
 	 */
 	@GetMapping(ME_URL)
+	@Operation(
+			summary = "Retrieve authenticated user information",
+			description = "Fetches the details of the authenticated user. Requires a valid JWT token.",
+			responses = {
+					@ApiResponse(
+							responseCode = "200",
+							description = "Successful operation. Returns the authenticated user's information.",
+							content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseUserDTO.class))
+					),
+					@ApiResponse(
+							responseCode = "401",
+							description = "Unauthorized. Invalid or missing JWT token.",
+							content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+					)
+			},
+			security = @SecurityRequirement(name = "bearerAuth")
+	)
 	public ResponseEntity<Object> getUser() {
 		User user = userService.getAuthenticateUser();
 		if(user != null) {
 			ResponseUserDTO userDTO = userService.getUserResponseDTO();
 			return ResponseEntity.ok().body(userDTO);
 		} else {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(ResponseMessages.ACCESS_DENIED));
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(ResponseMessages.UNAUTHORIZED_ACCESS));
 		}
 	}
 }
