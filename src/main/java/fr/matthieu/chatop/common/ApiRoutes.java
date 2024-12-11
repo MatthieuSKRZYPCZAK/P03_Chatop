@@ -1,7 +1,10 @@
-package fr.matthieu.chatop.controller;
+package fr.matthieu.chatop.common;
 
+
+/**
+ * A utility class that centralizes the definitions of API route constants.
+ */
 public class ApiRoutes {
-
 
 	public static final String BASE_URL = "/api";
 
@@ -23,6 +26,10 @@ public class ApiRoutes {
 	/* Message URL */
 	public static final String MESSAGES_URL = BASE_URL+"/messages";
 
+	/* Swagger UI - Api docs */
+	public static final String SWAGGER_UI_URL = BASE_URL+"/swagger-ui/**";
+
+	public static final String API_DOCS_URL = BASE_URL+"/api-docs/**";
 
 
 }
