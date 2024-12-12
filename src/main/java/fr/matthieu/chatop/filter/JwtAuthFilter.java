@@ -61,7 +61,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 				isTokenExpired = jwtService.isTokenExpired(token);
 				username = jwtService.extractUsername(token);
 			} catch (MalformedJwtException e) {
-				// If the token is malformed, send an error response and stop processing
 				sendErrorResponse(response);
 				return;
 			}
@@ -101,7 +100,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 		boolean shouldNotFilter = path.startsWith(REGISTER_URL) ||
 				path.startsWith(LOGIN_URL) ||
 				path.startsWith(SWAGGER_UI_URL) ||
-				path.startsWith(API_DOCS_URL);
+				path.startsWith(API_DOCS_URL) ||
+				path.startsWith("/uploads/");
 		log.info("Should not filter {}: {}", path, shouldNotFilter);
 		return shouldNotFilter;
 	}
