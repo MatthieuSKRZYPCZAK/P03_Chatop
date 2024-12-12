@@ -3,16 +3,19 @@ package fr.matthieu.chatop.controller;
 import fr.matthieu.chatop.common.ErrorResponse;
 import fr.matthieu.chatop.dto.CreateRentalDTO;
 import fr.matthieu.chatop.dto.RentalDTO;
+import fr.matthieu.chatop.model.Rental;
 import fr.matthieu.chatop.service.RentalService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,10 +24,12 @@ import java.util.Map;
 
 import static fr.matthieu.chatop.common.ApiRoutes.*;
 import static fr.matthieu.chatop.common.ResponseMessages.RENTAL_CREATED;
+import static fr.matthieu.chatop.common.ResponseMessages.RENTAL_UPDATED;
 
 
 @Slf4j
 @RestController
+@SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Rentals", description = "Endpoints for managing rentals")
 public class RentalController {
 
@@ -89,7 +94,7 @@ public class RentalController {
 		return ResponseEntity.ok(rental);
 	}
 
-	@PostMapping(RENTALS_URL)
+	@PostMapping( value = RENTALS_URL, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	@Operation(
 		summary = "Create a new rental",
 		description = "Creates a new rental with the given details.",
@@ -111,12 +116,37 @@ public class RentalController {
 			)
 		}
 	)
-	public ResponseEntity<Object> createRental(@Valid @RequestBody CreateRentalDTO createRentalDTO) {
+	public ResponseEntity<Object> createRental(@Valid @ModelAttribute CreateRentalDTO createRentalDTO) {
+		if(createRentalDTO.picture().isEmpty()) {
+			return ResponseEntity.status(HttpStatus.OK)
+					.body(Map.of("picture", "The rental picture is required."));
+		}
 
-		boolean createRental = rentalService.createRental(createRentalDTO);
-
-		return ResponseEntity.status(200).body(Map.of("message", RENTAL_CREATED));
+		rentalService.createRental(createRentalDTO);
+		return ResponseEntity.ok().body(Map.of("message", RENTAL_CREATED));
 	}
 
 
+	@PutMapping(RENTAL_ID_URL)
+	@Operation(
+		summary = "Update rental by ID",
+		description = "Updates the details of a specific rental by its ID.",
+		responses = {
+			@ApiResponse(
+				responseCode = "200",
+				description = "Rental updated successfully",
+				content = @Content(mediaType = "application/json", schema = @Schema(implementation = CreateRentalDTO.class))
+			),
+			@ApiResponse(
+				responseCode = "404",
+				description = "Rental not found",
+				content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+			)
+		}
+	)
+	public ResponseEntity<Object> updateRental(@PathVariable Long id, @Valid @ModelAttribute CreateRentalDTO createRentalDTO) {
+		Rental rental = rentalService.checkOwner(id);
+		rentalService.UpdateRental(rental, createRentalDTO);
+		return ResponseEntity.ok().body(Map.of("message", RENTAL_UPDATED));
+	}
 }
