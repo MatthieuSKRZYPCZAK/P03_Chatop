@@ -21,7 +21,7 @@ public class ApiRoutes {
 	/* Rentals URL */
 	public static final String RENTALS_URL = BASE_URL+"/rentals";
 
-	public static final String RENTAL_ID_URL = BASE_URL+"/{id}";
+	public static final String RENTAL_ID_URL = RENTALS_URL+"/{id}";
 
 	/* Message URL */
 	public static final String MESSAGES_URL = BASE_URL+"/messages";
