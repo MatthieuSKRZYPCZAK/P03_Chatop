@@ -1,5 +1,6 @@
 package fr.matthieu.chatop.configuration;
 
+import fr.matthieu.chatop.filter.GlobalExceptionFilter;
 import fr.matthieu.chatop.filter.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,10 +30,12 @@ public class SpringSecurityConfig {
 
 	private final BCryptPasswordEncoder passwordEncoder;
 	private final JwtAuthFilter jwtAuthFilter;
+	private final GlobalExceptionFilter globalExceptionFilter;
 
-	public SpringSecurityConfig(BCryptPasswordEncoder passwordEncoder, JwtAuthFilter jwtAuthFilter) {
+	public SpringSecurityConfig(BCryptPasswordEncoder passwordEncoder, JwtAuthFilter jwtAuthFilter, GlobalExceptionFilter globalExceptionFilter) {
 		this.passwordEncoder = passwordEncoder;
 		this.jwtAuthFilter = jwtAuthFilter;
+		this.globalExceptionFilter = globalExceptionFilter;
 	}
 
 	@Bean
@@ -44,13 +47,16 @@ public class SpringSecurityConfig {
 						.requestMatchers(
 								REGISTER_URL,
 								LOGIN_URL,
+								"/uploads/**",
 								API_DOCS_URL+"/**",
 								SWAGGER_UI_URL+"/**"
 								).permitAll()
 						.anyRequest().authenticated());
+		http.addFilterBefore(globalExceptionFilter, UsernamePasswordAuthenticationFilter.class);
 		http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 		return http.build();
 	}
+
 
 	/**
 	 * Provides the {@link AuthenticationManager} bean.
