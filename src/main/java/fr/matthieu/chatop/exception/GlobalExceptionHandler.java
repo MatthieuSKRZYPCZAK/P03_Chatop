@@ -96,4 +96,11 @@ public class GlobalExceptionHandler {
 		log.info("Handling JwtException - Issue with JWT processing.");
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(e.getMessage()));
 	}
+
+	@ExceptionHandler(UnauthorizedException.class)
+	public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException e) {
+		log.info("Handling UnauthorizedException - Unauthorized.");
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(e.getMessage()));
+	}
+
 }
