@@ -1,6 +1,7 @@
 package fr.matthieu.chatop.controller;
 
 import fr.matthieu.chatop.common.ErrorResponse;
+import fr.matthieu.chatop.dto.CreateRentalDTO;
 import fr.matthieu.chatop.dto.RentalDTO;
 import fr.matthieu.chatop.service.RentalService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import static fr.matthieu.chatop.common.ApiRoutes.*;
+import static fr.matthieu.chatop.common.ResponseMessages.RENTAL_CREATED;
 
 
 @Slf4j
@@ -95,7 +97,7 @@ public class RentalController {
 			@ApiResponse(
 				responseCode = "200",
 				description = "Rental created successfully",
-				content = @Content(mediaType = "application/json", schema = @Schema(implementation = Object.class))
+				content = @Content(mediaType = "application/json", schema = @Schema(implementation = CreateRentalDTO.class))
 			),
 			@ApiResponse(
 					responseCode = "400",
@@ -109,8 +111,11 @@ public class RentalController {
 			)
 		}
 	)
-	public ResponseEntity<Object> createRental(@Valid @RequestBody RentalDTO rental) {
-		return ResponseEntity.status(201).body(new Object());
+	public ResponseEntity<Object> createRental(@Valid @RequestBody CreateRentalDTO createRentalDTO) {
+
+		boolean createRental = rentalService.createRental(createRentalDTO);
+
+		return ResponseEntity.status(200).body(Map.of("message", RENTAL_CREATED));
 	}
 
 
