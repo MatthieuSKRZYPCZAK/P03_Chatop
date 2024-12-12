@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -56,6 +57,60 @@ public class RentalController {
 					.body(Map.of("message", "No rentals available"));
 		}
 		return ResponseEntity.ok().body(Map.of("rentals", rentals));
+	}
+
+
+	@GetMapping(RENTAL_ID_URL)
+	@Operation(
+		summary = "Get rental by ID",
+		description = "Fetches the details of a specific rental by its ID.",
+		responses = {
+			@ApiResponse(
+				responseCode = "200",
+				description = "Successful operation",
+				content = @Content(mediaType = "application/json", schema = @Schema(implementation = RentalDTO.class))
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Unauthorized. Invalid or missing JWT token.",
+					content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "Rental not found.",
+					content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+			)
+		}
+	)
+	public ResponseEntity<Object> getRentalById(@PathVariable Long id) {
+		RentalDTO rental = rentalService.getRentalDTOById(id);
+		return ResponseEntity.ok(rental);
+	}
+
+	@PostMapping(RENTALS_URL)
+	@Operation(
+		summary = "Create a new rental",
+		description = "Creates a new rental with the given details.",
+		responses = {
+			@ApiResponse(
+				responseCode = "200",
+				description = "Rental created successfully",
+				content = @Content(mediaType = "application/json", schema = @Schema(implementation = Object.class))
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad Request. Errors include: missing or invalid data",
+					content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+			),
+			@ApiResponse(
+				responseCode = "401",
+				description = "Unauthorized. Invalid or missing JWT token.",
+				content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+			)
+		}
+	)
+	public ResponseEntity<Object> createRental(@Valid @RequestBody RentalDTO rental) {
+		return ResponseEntity.status(201).body(new Object());
 	}
 
 
