@@ -4,6 +4,7 @@ package fr.matthieu.chatop.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -20,10 +21,10 @@ public class Rental {
 	private String name;
 
 	@Column(name = "surface", nullable = false)
-	private Integer surface;
+	private Double surface;
 
 	@Column(name = "price", nullable = false)
-	private Integer price;
+	private BigDecimal price;
 
 	@Column(name = "picture", nullable = false)
 	private String picture;
@@ -49,7 +50,7 @@ public class Rental {
 	@Deprecated
 	protected Rental() {}
 
-	public Rental(String name, Integer surface, Integer price, String picture, String description, User owner) {
+	public Rental(String name, Double surface, BigDecimal price, String picture, String description, User owner) {
 		this.name = name;
 		this.surface = surface;
 		this.price = price;

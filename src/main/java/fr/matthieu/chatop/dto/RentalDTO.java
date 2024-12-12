@@ -2,6 +2,8 @@ package fr.matthieu.chatop.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.math.BigDecimal;
+
 @Schema(name = "Rental details", description = "Represents rental details")
 public record RentalDTO(
 
@@ -12,10 +14,10 @@ public record RentalDTO(
 		String name,
 
 		@Schema(description = "The surface area of the rental in square meters", example = "75")
-		Integer surface,
+		Double surface,
 
 		@Schema(description = "The price of the rental per night in euros", example = "120")
-		Integer price,
+		BigDecimal price,
 
 		@Schema(description = "The URL of the rental property's picture file", example = "https://example.com/rental1.jpg")
 		String picture,
