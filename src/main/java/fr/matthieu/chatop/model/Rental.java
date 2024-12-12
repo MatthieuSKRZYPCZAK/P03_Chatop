@@ -49,6 +49,26 @@ public class Rental {
 	@Deprecated
 	protected Rental() {}
 
+	public Rental(String name, Integer surface, Integer price, String picture, String description, User owner) {
+		this.name = name;
+		this.surface = surface;
+		this.price = price;
+		this.picture = picture;
+		this.description = description;
+		this.owner = owner;
+	}
+
+	@PrePersist
+	public void prePersist() {
+		this.createdAt = LocalDateTime.now();
+		this.updatedAt = null;
+	}
+
+	@PreUpdate
+	public void preUpdate() {
+		this.updatedAt = LocalDateTime.now();
+	}
+
 
 
 
