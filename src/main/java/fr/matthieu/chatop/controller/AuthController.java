@@ -74,7 +74,7 @@ public class AuthController {
 	)
 	public ResponseEntity<Object> login(@RequestBody AuthenticationDTO authenticationDTO) {
 		Authentication authentication = authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(authenticationDTO.username(), authenticationDTO.password())
+				new UsernamePasswordAuthenticationToken(authenticationDTO.email(), authenticationDTO.password())
 		);
 		log.info("result {}", authentication.isAuthenticated());
 		if (authentication.isAuthenticated()) {
