@@ -21,4 +21,10 @@ public class ResponseMessages {
 	public static final String RENTAL_NOT_FOUND = "Rental with ID %d not found";
 
 	public static final String RENTAL_CREATED = "Rental created !";
+
+	public static final String RENTAL_UPDATED = "Rental updated !";
+
+	public static final String SERVICE_UNAVAILABLE = "service unavailable";
+
+	public static final String JWT_EXPIRED = "JWT token has expired";
 }
