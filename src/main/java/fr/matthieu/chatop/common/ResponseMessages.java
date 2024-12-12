@@ -17,4 +17,6 @@ public class ResponseMessages {
 	public static final String UNAUTHORIZED_ACCESS = "unauthorized access";
 
 	public static final String USER_NOT_FOUND = "user not found";
+
+	public static final String RENTAL_NOT_FOUND = "Rental with ID %d not found";
 }
