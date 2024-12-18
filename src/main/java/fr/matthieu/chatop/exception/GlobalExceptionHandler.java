@@ -66,7 +66,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(BadCredentialsException.class)
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	public ResponseEntity<Object> handleBadCredentials(BadCredentialsException e) {
-		log.info("Handling BadCredentialsException - Invalid credentials provided for authentication. - " + e.getMessage());
+		log.info("Handling BadCredentialsException - Invalid credentials provided for authentication. - {}", e.getMessage());
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 				.body(new ErrorResponse(ResponseMessages.INVALID_CREDENTIALS));
 	}
@@ -97,10 +97,49 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(e.getMessage()));
 	}
 
+	/**
+	 * Handles the {@link UnauthorizedException}.
+	 * <p>
+	 * Thrown when a user attempts to access a resource they are not authorized to access.
+	 * </p>
+	 *
+	 * @param e The exception instance containing the error message.
+	 * @return A {@link ResponseEntity} with an error message and HTTP status 401 (Unauthorized).
+	 */
 	@ExceptionHandler(UnauthorizedException.class)
 	public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException e) {
 		log.info("Handling UnauthorizedException - Unauthorized.");
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(e.getMessage()));
+	}
+
+	/**
+	 * Handles the {@link UserNotFoundException}.
+	 * <p>
+	 * Thrown when a user cannot be found by the given identifier.
+	 * </p>
+	 *
+	 * @param e The exception instance containing the error message.
+	 * @return A {@link ResponseEntity} with an error message and HTTP status 404 (Not Found).
+	 */
+	@ExceptionHandler(UserNotFoundException.class)
+	public ResponseEntity<ErrorResponse> userNotFoundException(UserNotFoundException e) {
+		log.info("Handling UserNotFoundException - User not found.");
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
+	}
+
+	/**
+	 * Handles the {@link FileStorageException}.
+	 * <p>
+	 * Thrown when there is an error during file storage operations, such as saving or retrieving files.
+	 * </p>
+	 *
+	 * @param e The exception instance containing the error message.
+	 * @return A {@link ResponseEntity} with an error message and HTTP status 500 (Internal Server Error).
+	 */
+	@ExceptionHandler(FileStorageException.class)
+	public ResponseEntity<ErrorResponse> handleFileStorageException(FileStorageException e) {
+		log.info("Handling FileStorageException - File storage error.");
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
 	}
 
 }
