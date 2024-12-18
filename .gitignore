@@ -6,6 +6,11 @@ target/
 
 ### UPLOADS ###
 uploads/
+!uploads/rentals/example1.jpg
+!uploads/rentals/example2.jpg
+!uploads/rentals/example3.jpg
+!uploads/rentals/example4.jpg
+!uploads/rentals/example5.jpg
 
 ### STS ###
 .apt_generated
