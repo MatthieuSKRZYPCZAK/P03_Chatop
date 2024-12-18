@@ -3,7 +3,7 @@ package fr.matthieu.chatop.controller;
 import fr.matthieu.chatop.common.ResponseMessages;
 import fr.matthieu.chatop.dto.AuthenticationDTO;
 import fr.matthieu.chatop.dto.RegisterDTO;
-import fr.matthieu.chatop.dto.ResponseUserDTO;
+import fr.matthieu.chatop.dto.UserDTO;
 import fr.matthieu.chatop.common.ErrorResponse;
 import fr.matthieu.chatop.model.User;
 import fr.matthieu.chatop.service.JWTService;
@@ -76,7 +76,6 @@ public class AuthController {
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(authenticationDTO.email(), authenticationDTO.password())
 		);
-		log.info("result {}", authentication.isAuthenticated());
 		if (authentication.isAuthenticated()) {
 			User user = (User) authentication.getPrincipal();
 			userService.incrementTokenVersion(user);
@@ -112,7 +111,6 @@ public class AuthController {
 			}
 	)
 	public ResponseEntity<Object> register(@Valid @RequestBody RegisterDTO registerDTO) {
-		log.info("Registering new user");
 		String token = userService.register(registerDTO);
 
 		if(token != null) {
@@ -132,24 +130,24 @@ public class AuthController {
 	@Operation(
 			summary = "Retrieve authenticated user information",
 			description = "Fetches the details of the authenticated user. Requires a valid JWT token.",
+			security = @SecurityRequirement(name = "bearerAuth"),
 			responses = {
 					@ApiResponse(
 							responseCode = "200",
 							description = "Successful operation. Returns the authenticated user's information.",
-							content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseUserDTO.class))
+							content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))
 					),
 					@ApiResponse(
 							responseCode = "401",
 							description = "Unauthorized. Invalid or missing JWT token.",
 							content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
 					)
-			},
-			security = @SecurityRequirement(name = "bearerAuth")
+			}
 	)
 	public ResponseEntity<Object> getUser() {
 		User user = userService.getAuthenticateUser();
 		if(user != null) {
-			ResponseUserDTO userDTO = userService.getUserResponseDTO();
+			UserDTO userDTO = userService.getUserResponseDTO();
 			return ResponseEntity.ok().body(userDTO);
 		} else {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(ResponseMessages.UNAUTHORIZED_ACCESS));

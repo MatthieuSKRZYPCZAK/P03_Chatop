@@ -1,6 +1,5 @@
 package fr.matthieu.chatop.model;
 
-
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -59,19 +58,21 @@ public class Rental {
 		this.owner = owner;
 	}
 
+	/**
+	 * Sets timestamps before the entity is persisted.
+	 */
 	@PrePersist
 	public void prePersist() {
 		this.createdAt = LocalDateTime.now();
 		this.updatedAt = null;
 	}
 
+	/**
+	 * Updates the timestamp before the entity is updated.
+	 */
 	@PreUpdate
 	public void preUpdate() {
 		this.updatedAt = LocalDateTime.now();
 	}
-
-
-
-
 
 }

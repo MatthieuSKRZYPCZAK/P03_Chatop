@@ -6,12 +6,19 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 
+/**
+ * Data Transfer Object (DTO) representing the data required to create a rental property.
+ * <p>
+ * This DTO is used to validate and transfer user input for creating a new rental property.
+ * It includes details such as the rental's name, surface area, price, picture, and description.
+ * </p>
+ */
 @Schema(name = "Create Rental", description = "Represents the data required to create a rental")
 public record CreateRentalDTO(
 
 		@Schema(description = "The name of the rental property", example = "Seaside Apartment")
 		@NotBlank(message = "The rental name is required.")
-		@Size(max = 100, message = "The rental name must not exceed {max} characters.")
+		@Size(min = 1, max = 100, message = "The rental name must be between {min} and {max} characters.")
 		String name,
 
 		@Schema(description = "The surface area of the rental in square meters", example = "75")

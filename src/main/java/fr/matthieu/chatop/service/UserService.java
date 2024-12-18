@@ -1,8 +1,9 @@
 package fr.matthieu.chatop.service;
 
 import fr.matthieu.chatop.dto.RegisterDTO;
-import fr.matthieu.chatop.dto.ResponseUserDTO;
+import fr.matthieu.chatop.dto.UserDTO;
 import fr.matthieu.chatop.exception.UserAlreadyExistsException;
+import fr.matthieu.chatop.exception.UserNotFoundException;
 import fr.matthieu.chatop.model.User;
 import fr.matthieu.chatop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +80,7 @@ public class UserService implements UserDetailsService {
 	 * @throws UsernameNotFoundException If the user does not exist.
 	 */
 	public User getUserById(Long id) {
-		return this.userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND) );
+		return this.userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND) );
 	}
 
 	/**
@@ -106,24 +107,13 @@ public class UserService implements UserDetailsService {
 	}
 
 	/**
-	 * Constructs a {@link ResponseUserDTO} for the currently authenticated user.
+	 * Constructs a {@link UserDTO} for the currently authenticated user.
 	 *
-	 * @return A {@link ResponseUserDTO} containing user details.
+	 * @return A {@link UserDTO} containing user details.
 	 */
-	public ResponseUserDTO getUserResponseDTO() {
+	public UserDTO getUserResponseDTO() {
 		User user = getAuthenticateUser();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-		String createdAtFormatted = user.getCreatedAt().format(formatter);
-		LocalDateTime updatedAt = user.getUpdatedAt();
-		String updatedAtFormatted = updatedAt != null ? updatedAt.format(formatter) : null;
-
-		return new ResponseUserDTO(
-				user.getId(),
-				user.getName(),
-				user.getEmail(),
-				createdAtFormatted,
-				updatedAtFormatted
-		);
+		return convertToResponseDTO(user);
 	}
 
 	/**
@@ -134,5 +124,36 @@ public class UserService implements UserDetailsService {
 	public void incrementTokenVersion(User user) {
 		user.incrementTokenVersion();
 		userRepository.save(user);
+	}
+
+	/**
+	 * Retrieves a {@link UserDTO} for a user by their ID.
+	 *
+	 * @param id The ID of the user.
+	 * @return A {@link UserDTO} containing user details.
+	 */
+	public UserDTO getUserDTOById(Long id) {
+		return convertToResponseDTO(getUserById(id));
+	}
+
+	/**
+	 * Converts a {@link User} object into a {@link UserDTO}.
+	 *
+	 * @param user The {@link User} object to be converted.
+	 * @return A {@link UserDTO} containing user details.
+	 */
+	private UserDTO convertToResponseDTO(User user) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+		String createdAtFormatted = user.getCreatedAt().format(formatter);
+		LocalDateTime updatedAt = user.getUpdatedAt();
+		String updatedAtFormatted = updatedAt != null ? updatedAt.format(formatter) : null;
+
+		return new UserDTO(
+				user.getId(),
+				user.getName(),
+				user.getEmail(),
+				createdAtFormatted,
+				updatedAtFormatted
+		);
 	}
 }

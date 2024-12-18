@@ -26,10 +26,12 @@ import static fr.matthieu.chatop.common.ApiRoutes.*;
 import static fr.matthieu.chatop.common.ResponseMessages.RENTAL_CREATED;
 import static fr.matthieu.chatop.common.ResponseMessages.RENTAL_UPDATED;
 
-
+/**
+ * REST Controller responsible for handling rental-related actions.
+ * It includes endpoints for fetching, creating, and updating rentals.
+ */
 @Slf4j
 @RestController
-@SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Rentals", description = "Endpoints for managing rentals")
 public class RentalController {
 
@@ -40,10 +42,16 @@ public class RentalController {
 		this.rentalService = rentalService;
 	}
 
+	/**
+	 * Retrieves a list of all rentals.
+	 *
+	 * @return A {@link ResponseEntity} containing the list of rentals or a message if no rentals are available.
+	 */
 	@GetMapping(RENTALS_URL)
 	@Operation(
 			summary = "Get all rentals",
 			description = "Fetches a list of all available rentals.",
+			security = @SecurityRequirement(name = "bearerAuth"),
 			responses = {
 					@ApiResponse(
 							responseCode = "200",
@@ -66,11 +74,17 @@ public class RentalController {
 		return ResponseEntity.ok().body(Map.of("rentals", rentals));
 	}
 
-
+	/**
+	 * Retrieves the details of a specific rental by its ID.
+	 *
+	 * @param id The ID of the rental to retrieve.
+	 * @return A {@link ResponseEntity} containing the rental details.
+	 */
 	@GetMapping(RENTAL_ID_URL)
 	@Operation(
 		summary = "Get rental by ID",
 		description = "Fetches the details of a specific rental by its ID.",
+		security = @SecurityRequirement(name = "bearerAuth"),
 		responses = {
 			@ApiResponse(
 				responseCode = "200",
@@ -94,10 +108,17 @@ public class RentalController {
 		return ResponseEntity.ok(rental);
 	}
 
+	/**
+	 * Creates a new rental with the provided details.
+	 *
+	 * @param createRentalDTO A DTO containing the details of the rental to be created.
+	 * @return A {@link ResponseEntity} containing a success message.
+	 */
 	@PostMapping( value = RENTALS_URL, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	@Operation(
 		summary = "Create a new rental",
 		description = "Creates a new rental with the given details.",
+		security = @SecurityRequirement(name = "bearerAuth"),
 		responses = {
 			@ApiResponse(
 				responseCode = "200",
@@ -126,11 +147,18 @@ public class RentalController {
 		return ResponseEntity.ok().body(Map.of("message", RENTAL_CREATED));
 	}
 
-
+	/**
+	 * Updates the details of a specific rental by its ID.
+	 *
+	 * @param id              The ID of the rental to update.
+	 * @param createRentalDTO A DTO containing the updated details of the rental.
+	 * @return A {@link ResponseEntity} containing a success message.
+	 */
 	@PutMapping(RENTAL_ID_URL)
 	@Operation(
 		summary = "Update rental by ID",
 		description = "Updates the details of a specific rental by its ID.",
+		security = @SecurityRequirement(name = "bearerAuth"),
 		responses = {
 			@ApiResponse(
 				responseCode = "200",
@@ -141,6 +169,11 @@ public class RentalController {
 				responseCode = "404",
 				description = "Rental not found",
 				content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Unauthorized. Invalid or missing JWT token.",
+					content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
 			)
 		}
 	)

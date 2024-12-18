@@ -4,6 +4,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
 
+/**
+ * Data Transfer Object (DTO) representing the details of a rental property.
+ * <p>
+ * This DTO is used to transfer rental property data.
+ * It includes information such as the rental's name, surface area, price, picture URL, description,
+ * owner information, and timestamps for creation and updates.
+ * </p>
+ */
 @Schema(name = "Rental details", description = "Represents rental details")
 public record RentalDTO(
 

@@ -7,18 +7,17 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 @Schema(name = "Error Response", description = "Represents an error response with a descriptive message")
 public class ErrorResponse {
-	private String message;
+
+	@Schema(description = "The error message describing the problem", example = "An unexpected error occurred.")
+	private final String message;
 
 	public ErrorResponse(String message) {
 		this.message = message;
 	}
 
+	@SuppressWarnings("unused")
 	public String getError() {
 		return message;
 	}
 
-	public ErrorResponse setError(String message) {
-		this.message = message;
-		return this;
-	}
 }

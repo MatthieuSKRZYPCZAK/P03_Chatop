@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * @param updated_at The date when the user was last updated, formatted as "yyyy/MM/dd".
  */
 @Schema(name = "User details",description = "Represents the user details returned in the API response")
-public record ResponseUserDTO(
+public record UserDTO(
 
 		@Schema(description = "The unique identifier of the user", example = "123")
 		Long id,
