@@ -21,6 +21,9 @@ public class ApiRoutes {
 
 	public static final String ME_URL = AUTH_URL+"/me";
 
+	/* Users URL */
+	public static final String USER_ID_URL = BASE_URL+"/user/{id}";
+
 	/* Rentals URL */
 	public static final String RENTALS_URL = BASE_URL+"/rentals";
 
