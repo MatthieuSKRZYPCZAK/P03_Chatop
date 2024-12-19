@@ -1,12 +1,12 @@
 package fr.matthieu.chatop.repository;
 
-import fr.matthieu.chatop.model.User;
+import fr.matthieu.chatop.model.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
-	Optional<User> findByEmail(String email);
+public interface UserRepository extends JpaRepository<UserEntity, Long> {
+	Optional<UserEntity> findByEmail(String email);
 }

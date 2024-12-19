@@ -17,8 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-import static fr.matthieu.chatop.common.ResponseMessages.JWT_EXPIRED;
-import static fr.matthieu.chatop.common.ResponseMessages.SERVICE_UNAVAILABLE;
+import static fr.matthieu.chatop.common.ResponseMessages.*;
 
 /**
  * Filter class for handling global exceptions during request processing.

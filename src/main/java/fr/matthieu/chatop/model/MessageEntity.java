@@ -10,25 +10,25 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name = "messages")
-public class Message {
+public class MessageEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@NotBlank(message = "Message content is required")
-	@Column(name="message", nullable=false, length = 500)
+	@Column(name="message", nullable=false, length = 1000)
 	private String message;
 
 	@NotNull(message = "Sender is required.")
 	@ManyToOne
 	@JoinColumn(name = "user_id", nullable = false)
-	private User sender;
+	private UserEntity sender;
 
 	@NotNull(message = "Rental is required.")
 	@ManyToOne
 	@JoinColumn(name = "rental_id", nullable=false)
-	private Rental rental;
+	private RentalEntity rentalEntity;
 
 
 	@Column(name="created_at", nullable = false, updatable = false)
@@ -42,19 +42,19 @@ public class Message {
 	 * This constructor should not be used in application code.
 	 */
 	@Deprecated
-	protected Message() {}
+	protected MessageEntity() {}
 
 	/**
 	 * Constructs a new {@code Message} with the specified content, sender, and rental.
 	 *
 	 * @param message The content of the message.
 	 * @param sender  The user sending the message.
-	 * @param rental  The rental related to the message.
+	 * @param rentalEntity  The rental related to the message.
 	 */
-	public Message(String message, User sender, Rental rental) {
+	public MessageEntity(String message, UserEntity sender, RentalEntity rentalEntity) {
 		this.message = message;
 		this.sender = sender;
-		this.rental = rental;
+		this.rentalEntity = rentalEntity;
 	}
 
 

@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name = "rentals")
-public class Rental {
+public class RentalEntity {
 
 
 	@Id
@@ -28,12 +28,12 @@ public class Rental {
 	@Column(name = "picture", nullable = false)
 	private String picture;
 
-	@Column(name = "description", nullable = false)
+	@Column(name = "description", nullable = false, length = 1000)
 	private String description;
 
 	@ManyToOne
 	@JoinColumn(name = "owner_id", nullable = false)
-	private User owner;
+	private UserEntity owner;
 
 	@Column(name = "created_at")
 	private LocalDateTime createdAt;
@@ -47,9 +47,9 @@ public class Rental {
 	 * This constructor should not be used in application code.
 	 */
 	@Deprecated
-	protected Rental() {}
+	protected RentalEntity() {}
 
-	public Rental(String name, Double surface, BigDecimal price, String picture, String description, User owner) {
+	public RentalEntity(String name, Double surface, BigDecimal price, String picture, String description, UserEntity owner) {
 		this.name = name;
 		this.surface = surface;
 		this.price = price;

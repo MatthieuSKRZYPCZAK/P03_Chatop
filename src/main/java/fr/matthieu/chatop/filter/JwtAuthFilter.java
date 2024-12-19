@@ -2,7 +2,7 @@ package fr.matthieu.chatop.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.matthieu.chatop.common.ErrorResponse;
-import fr.matthieu.chatop.model.User;
+import fr.matthieu.chatop.model.UserEntity;
 import fr.matthieu.chatop.service.JWTService;
 import fr.matthieu.chatop.service.UserService;
 import io.jsonwebtoken.MalformedJwtException;
@@ -48,7 +48,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request,@NonNull HttpServletResponse response,@NonNull FilterChain filterChain) throws ServletException, IOException {
-		log.info("JWT Auth Filter");
 		String token;
 		String username;
 		boolean isTokenExpired;
@@ -75,7 +74,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 			Integer tokenVersion = jwtService.getClaim(token, claims -> claims.get("tokenVersion", Integer.class));
 
 			// Check if the token version matches the user's current token version
-			if (tokenVersion != null && tokenVersion.equals(((User) userDetails).getTokenVersion())) {
+			if (tokenVersion != null && tokenVersion.equals(((UserEntity) userDetails).getTokenVersion())) {
 				UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 				SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 			} else {
@@ -95,16 +94,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 	 */
 	@Override
 	protected boolean shouldNotFilter(HttpServletRequest request) {
-
 		String path = request.getRequestURI();
-		boolean shouldNotFilter =
-				path.startsWith(REGISTER_URL) ||
-				path.startsWith(LOGIN_URL) ||
-				path.startsWith(SWAGGER_UI_URL) ||
-				path.startsWith(API_DOCS_URL) ||
-				path.startsWith("/uploads/");
-		log.info("Should not filter {}: {}", path, shouldNotFilter);
-		return shouldNotFilter;
+
+		return path.startsWith(REGISTER_URL) ||
+		path.startsWith(LOGIN_URL) ||
+		path.startsWith(SWAGGER_UI_URL) ||
+		path.startsWith(API_DOCS_URL) ||
+		path.startsWith("/uploads/");
 	}
 
 	/**

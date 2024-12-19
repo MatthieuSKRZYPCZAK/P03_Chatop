@@ -15,7 +15,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "users")
-public class User implements UserDetails {
+public class UserEntity implements UserDetails {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,9 +50,9 @@ public class User implements UserDetails {
 	 * Default constructor required by JPA.
 	 * This constructor should not be used in application code.
 	 */
-	public User() {}
+	public UserEntity() {}
 
-	public User(String email, String password, String name) {
+	public UserEntity(String email, String password, String name) {
 		this.email = email;
 		this.password = password;
 		this.name = name;

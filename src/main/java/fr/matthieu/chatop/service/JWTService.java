@@ -1,7 +1,7 @@
 package fr.matthieu.chatop.service;
 
 
-import fr.matthieu.chatop.model.User;
+import fr.matthieu.chatop.model.UserEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -29,11 +29,11 @@ public class JWTService {
 	/**
 	 * Generates a JWT token for the given user.
 	 *
-	 * @param user The user for whom the token is being generated.
+	 * @param userEntity The user for whom the token is being generated.
 	 * @return A JWT token as a string.
 	 */
-	public String generate(User user) {
-		Map<String, String> tokenMap = this.generateJwt(user);
+	public String generate(UserEntity userEntity) {
+		Map<String, String> tokenMap = this.generateJwt(userEntity);
 		return tokenMap.get("bearer");
 	}
 
@@ -88,25 +88,25 @@ public class JWTService {
 	/**
 	 * Generates a JWT token containing claims for the given user.
 	 *
-	 * @param user The user for whom the token is being generated.
+	 * @param userEntity The user for whom the token is being generated.
 	 * @return A map containing the generated token with the key "bearer".
 	 */
-	private Map<String, String> generateJwt(User user) {
+	private Map<String, String> generateJwt(UserEntity userEntity) {
 
 		final long currentTime = System.currentTimeMillis();
 		final long expirationTime = currentTime + 30 * 60 * 1000; // 30mn
 
 		final Map<String, Object> claims = Map.of(
-				"name", user.getName(),
+				"name", userEntity.getName(),
 				Claims.EXPIRATION, new Date(expirationTime),
-				Claims.SUBJECT, user.getEmail(),
-				"tokenVersion", user.getTokenVersion()
+				Claims.SUBJECT, userEntity.getEmail(),
+				"tokenVersion", userEntity.getTokenVersion()
 		);
 
 		final String bearer = Jwts.builder()
 				.setIssuedAt(new Date(currentTime))
 				.setExpiration(new Date(expirationTime))
-				.setSubject(user.getEmail())
+				.setSubject(userEntity.getEmail())
 				.setClaims(claims)
 				.signWith(getKey(), SignatureAlgorithm.HS256)
 				.compact();

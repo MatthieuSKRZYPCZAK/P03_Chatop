@@ -2,11 +2,13 @@ package fr.matthieu.chatop.service;
 
 import fr.matthieu.chatop.dto.RegisterDTO;
 import fr.matthieu.chatop.dto.UserDTO;
+import fr.matthieu.chatop.exception.UnauthorizedException;
 import fr.matthieu.chatop.exception.UserAlreadyExistsException;
 import fr.matthieu.chatop.exception.UserNotFoundException;
-import fr.matthieu.chatop.model.User;
+import fr.matthieu.chatop.model.UserEntity;
 import fr.matthieu.chatop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,8 +20,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
-import static fr.matthieu.chatop.common.ResponseMessages.EMAIL_ALREADY_IN_USE;
-import static fr.matthieu.chatop.common.ResponseMessages.USER_NOT_FOUND;
+import static fr.matthieu.chatop.common.ResponseMessages.*;
 
 /**
  * Service class for managing user-related operations.
@@ -49,13 +50,13 @@ public class UserService implements UserDetailsService {
 	 * @throws UserAlreadyExistsException If the email is already in use.
 	 */
 	public String register(RegisterDTO registerDTO) {
-		Optional<User> userExist = userRepository.findByEmail(registerDTO.email());
+		Optional<UserEntity> userExist = userRepository.findByEmail(registerDTO.email());
 		if (userExist.isPresent()) {
 			throw new UserAlreadyExistsException(EMAIL_ALREADY_IN_USE);
 		}
-		User user = convertToUser(registerDTO);
-		User savedUser = userRepository.save(user);
-		return jwtService.generate(savedUser);
+		UserEntity userEntity = convertToUser(registerDTO);
+		UserEntity savedUserEntity = userRepository.save(userEntity);
+		return jwtService.generate(savedUserEntity);
 	}
 
 	/**
@@ -76,21 +77,21 @@ public class UserService implements UserDetailsService {
 	 * Retrieves a user by their ID.
 	 *
 	 * @param id The ID of the user.
-	 * @return The {@link User} object.
+	 * @return The {@link UserEntity} object.
 	 * @throws UsernameNotFoundException If the user does not exist.
 	 */
-	public User getUserById(Long id) {
+	public UserEntity getUserById(Long id) {
 		return this.userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND) );
 	}
 
 	/**
-	 * Converts a {@link RegisterDTO} into a {@link User} object.
+	 * Converts a {@link RegisterDTO} into a {@link UserEntity} object.
 	 *
 	 * @param registerDTO The registration details provided by the client.
-	 * @return A {@link User} object.
+	 * @return A {@link UserEntity} object.
 	 */
-	private User convertToUser(RegisterDTO registerDTO) {
-		return new User(
+	private UserEntity convertToUser(RegisterDTO registerDTO) {
+		return new UserEntity(
 				registerDTO.email().toLowerCase(),
 				passwordEncoder.encode(registerDTO.password()),
 				registerDTO.name()
@@ -100,10 +101,14 @@ public class UserService implements UserDetailsService {
 	/**
 	 * Retrieves the currently authenticated user from the security context.
 	 *
-	 * @return The {@link User} object of the authenticated user.
+	 * @return The {@link UserEntity} object of the authenticated user.
 	 */
-	public User getAuthenticateUser() {
-		return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	public UserEntity getAuthenticateUser() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication == null || authentication.getPrincipal() == null || !(authentication.getPrincipal() instanceof UserEntity)) {
+			throw new UnauthorizedException(UNAUTHORIZED_ACCESS);
+		}
+		return (UserEntity) authentication.getPrincipal();
 	}
 
 	/**
@@ -112,18 +117,18 @@ public class UserService implements UserDetailsService {
 	 * @return A {@link UserDTO} containing user details.
 	 */
 	public UserDTO getUserResponseDTO() {
-		User user = getAuthenticateUser();
-		return convertToResponseDTO(user);
+		UserEntity userEntity = getAuthenticateUser();
+		return convertToResponseDTO(userEntity);
 	}
 
 	/**
 	 * Increments the token version for a user and saves the changes to the database.
 	 *
-	 * @param user The {@link User} whose token version is to be incremented.
+	 * @param userEntity The {@link UserEntity} whose token version is to be incremented.
 	 */
-	public void incrementTokenVersion(User user) {
-		user.incrementTokenVersion();
-		userRepository.save(user);
+	public void incrementTokenVersion(UserEntity userEntity) {
+		userEntity.incrementTokenVersion();
+		userRepository.save(userEntity);
 	}
 
 	/**
@@ -137,21 +142,21 @@ public class UserService implements UserDetailsService {
 	}
 
 	/**
-	 * Converts a {@link User} object into a {@link UserDTO}.
+	 * Converts a {@link UserEntity} object into a {@link UserDTO}.
 	 *
-	 * @param user The {@link User} object to be converted.
+	 * @param userEntity The {@link UserEntity} object to be converted.
 	 * @return A {@link UserDTO} containing user details.
 	 */
-	private UserDTO convertToResponseDTO(User user) {
+	private UserDTO convertToResponseDTO(UserEntity userEntity) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-		String createdAtFormatted = user.getCreatedAt().format(formatter);
-		LocalDateTime updatedAt = user.getUpdatedAt();
+		String createdAtFormatted = userEntity.getCreatedAt().format(formatter);
+		LocalDateTime updatedAt = userEntity.getUpdatedAt();
 		String updatedAtFormatted = updatedAt != null ? updatedAt.format(formatter) : null;
 
 		return new UserDTO(
-				user.getId(),
-				user.getName(),
-				user.getEmail(),
+				userEntity.getId(),
+				userEntity.getName(),
+				userEntity.getEmail(),
 				createdAtFormatted,
 				updatedAtFormatted
 		);
