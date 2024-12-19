@@ -12,9 +12,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
-
-import static fr.matthieu.chatop.common.ApiRoutes.APP_URL;
 
 /**
  * Service class for handling file uploads.
@@ -28,25 +28,19 @@ import static fr.matthieu.chatop.common.ApiRoutes.APP_URL;
 public class UploadService {
 
 	@Value("${server.port}")
-	String port;
+	private String port;
 
-	private final Path uploadPath = Paths.get("uploads/rentals");
+	@Value("${file.upload-dir}")
+	private String uploadDir;
 
-	/**
-	 * Constructs the {@code UploadService} and ensures that the upload directory exists.
-	 * <p>
-	 * If the directory does not exist, it attempts to create it. If directory creation fails,
-	 * a {@link FileStorageException} is thrown.
-	 * </p>
-	 */
-	public UploadService() {
-		try {
-			Files.createDirectories(uploadPath);
-		} catch (IOException e) {
-			log.error("Could not create upload directory!", e);
-			throw new FileStorageException("Could not create upload directory!");
-		}
-	}
+	@Value("${app.base-url}")
+	private String baseUrl;
+
+	@Value("${file.upload-relative-path}")
+	private String uploadRelativePath;
+
+
+
 
 	/**
 	 * Stores a picture file in the upload directory and generates a URL for accessing it.
@@ -62,29 +56,105 @@ public class UploadService {
 	 */
 	protected String storePicture(MultipartFile picture, String name) {
 
-		String originalFilename = picture.getOriginalFilename();
-		String extension = "";
+		Path uploadPath = initializeUploadDirectory();
 
-		if (originalFilename != null && originalFilename.contains(".")) {
-			extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-		}
+		validateFileType(picture);
 
-		String filename = UUID.randomUUID() + "_" + LocalDate.now() + "_" + name + extension;
+		String filename = generateUniqueFilename(picture.getOriginalFilename(), name);
+
+		saveFileToDisk(picture, uploadPath.resolve(filename));
+
+		return generateFileUrl(filename);
+
+	}
+
+	/**
+	 * Initializes the upload directory, creating it if necessary.
+	 *
+	 * @return The path to the upload directory.
+	 * @throws FileStorageException If the directory cannot be created.
+	 */
+	private Path initializeUploadDirectory() {
 		try {
-			Path destinationFile = uploadPath.resolve(Paths.get(filename)).normalize().toAbsolutePath();
+			Path path = Paths.get(uploadDir).toAbsolutePath().normalize();
+			Files.createDirectories(path);
+			log.info("Upload directory initialized at: {} ", path);
+			return path;
+		} catch (IOException e) {
+			log.error("Could not create upload directory!", e);
+			throw new FileStorageException("Could not create upload directory!");
+		}
+	}
 
-			if (!destinationFile.getParent().equals(uploadPath.toAbsolutePath())) {
+	/**
+	 * Validates the content type of the file.
+	 *
+	 * @param picture The file to validate.
+	 * @throws FileStorageException If the content type is not allowed.
+	 */
+	private void validateFileType(MultipartFile picture) {
+		String contentType = picture.getContentType();
+		List<String> allowedContentTypes = Arrays.asList("image/jpeg", "image/png");
+
+		if (!allowedContentTypes.contains(contentType)) {
+			throw new FileStorageException("Unsupported file type. Only JPEG and PNG files are allowed.");
+		}
+	}
+
+	/**
+	 * Generates a unique filename using a UUID, date, and name.
+	 *
+	 * @param originalFilename The original filename of the uploaded file.
+	 * @param name             The name to include in the new filename.
+	 * @return The generated filename.
+	 */
+	private String generateUniqueFilename(String originalFilename, String name) {
+		String extension = getFileExtension(originalFilename);
+		return UUID.randomUUID() + "_" + LocalDate.now() + "_" + name + extension;
+	}
+
+	/**
+	 * Extracts the file extension from the original filename.
+	 *
+	 * @param originalFilename The original filename.
+	 * @return The file extension, or an empty string if none is found.
+	 */
+	private String getFileExtension(String originalFilename) {
+		if (originalFilename == null || !originalFilename.contains(".")) {
+			return "";
+		}
+		return originalFilename.substring(originalFilename.lastIndexOf("."));
+	}
+
+	/**
+	 * Saves the file to the specified location on disk.
+	 *
+	 * @param picture        The file to save.
+	 * @param destinationPath The path where the file should be saved.
+	 * @throws FileStorageException If the file cannot be saved.
+	 */
+	private void saveFileToDisk(MultipartFile picture, Path destinationPath) {
+		try {
+			if (!destinationPath.getParent().equals(destinationPath.getParent().toAbsolutePath())) {
 				throw new FileStorageException("Cannot store file outside current directory.");
 			}
 
 			try (var inputStream = picture.getInputStream()) {
-				Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+				Files.copy(inputStream, destinationPath, StandardCopyOption.REPLACE_EXISTING);
 			}
-
-			return APP_URL+ port + "/uploads/rentals/" + filename;
 		} catch (IOException e) {
 			log.error("Failed to store file.", e);
 			throw new FileStorageException("Failed to store file.");
 		}
+	}
+
+	/**
+	 * Generates the public URL for accessing the uploaded file.
+	 *
+	 * @param filename The filename of the uploaded file.
+	 * @return The public URL as a string.
+	 */
+	private String generateFileUrl(String filename) {
+		return baseUrl + ":" + port + "/" + uploadRelativePath + "/" + filename;
 	}
 }
