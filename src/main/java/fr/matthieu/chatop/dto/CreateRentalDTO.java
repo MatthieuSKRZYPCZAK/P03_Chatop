@@ -38,7 +38,7 @@ public record CreateRentalDTO(
 
 		@Schema(description = "A brief description of the rental property", example = "A cozy apartment with a sea view")
 		@NotBlank(message = "The rental description is required.")
-		@Size(min = 2, max = 500, message = "The description must be between {min} and {max} characters.")
+		@Size(min = 1, max = 1000, message = "The description must be between {min} and {max} characters.")
 		String description
 ) {
 }
