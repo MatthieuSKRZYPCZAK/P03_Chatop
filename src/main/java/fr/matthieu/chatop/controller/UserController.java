@@ -63,7 +63,7 @@ public class UserController {
 					)
 			}
 	)
-	public ResponseEntity<Object> getUserById(@PathVariable Long id) {
+	public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
 		log.info("Get user by ID: {}", id);
 		UserDTO user = userService.getUserDTOById(id);
 		return ResponseEntity.ok().body(user);

@@ -71,7 +71,7 @@ public class MessageController {
 					)
 			}
 	)
-	public ResponseEntity<Object> createMessage(@Valid @RequestBody CreateMessageDTO createMessageDTO) {
+	public ResponseEntity<Map<String, String>> createMessage(@Valid @RequestBody CreateMessageDTO createMessageDTO) {
 		messageService.createMessage(createMessageDTO);
 		return ResponseEntity.ok().body(Map.of("message", MESSAGE_CREATED));
 	}

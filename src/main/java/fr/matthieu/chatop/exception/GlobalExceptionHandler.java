@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -140,6 +141,21 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleFileStorageException(FileStorageException e) {
 		log.info("Handling FileStorageException - File storage error.");
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
+	}
+
+	/**
+	 * Handles the {@link MaxUploadSizeExceededException}.
+	 * <p>
+	 * Thrown when a file upload exceeds the maximum allowed size.
+	 * </p>
+	 *
+	 * @param e The exception instance containing the error message.
+	 * @return A {@link ResponseEntity} with an error message and HTTP status 400 (Bad Request).
+	 */
+	@ExceptionHandler(MaxUploadSizeExceededException.class)
+	public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
+		log.info("MaxUploadSizeExceededException : {}", e.getMessage());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
 	}
 
 }

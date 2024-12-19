@@ -3,7 +3,7 @@ package fr.matthieu.chatop.controller;
 import fr.matthieu.chatop.common.ErrorResponse;
 import fr.matthieu.chatop.dto.CreateRentalDTO;
 import fr.matthieu.chatop.dto.RentalDTO;
-import fr.matthieu.chatop.model.Rental;
+import fr.matthieu.chatop.model.RentalEntity;
 import fr.matthieu.chatop.service.RentalService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -65,7 +65,7 @@ public class RentalController {
 					)
 			}
 	)
-	public ResponseEntity<Object> getAllRentals() {
+	public ResponseEntity<?> getAllRentals() {
 		List<RentalDTO> rentals = rentalService.getAllRentalsDTO();
 		if (rentals.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.OK)
@@ -103,7 +103,7 @@ public class RentalController {
 			)
 		}
 	)
-	public ResponseEntity<Object> getRentalById(@PathVariable Long id) {
+	public ResponseEntity<RentalDTO> getRentalById(@PathVariable Long id) {
 		RentalDTO rental = rentalService.getRentalDTOById(id);
 		return ResponseEntity.ok(rental);
 	}
@@ -137,10 +137,10 @@ public class RentalController {
 			)
 		}
 	)
-	public ResponseEntity<Object> createRental(@Valid @ModelAttribute CreateRentalDTO createRentalDTO) {
+	public ResponseEntity<Map<String, String>> createRental(@Valid @ModelAttribute CreateRentalDTO createRentalDTO) {
 		if(createRentalDTO.picture().isEmpty()) {
-			return ResponseEntity.status(HttpStatus.OK)
-					.body(Map.of("picture", "The rental picture is required."));
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.body(Map.of("error", "The rental picture is required."));
 		}
 
 		rentalService.createRental(createRentalDTO);
@@ -177,9 +177,9 @@ public class RentalController {
 			)
 		}
 	)
-	public ResponseEntity<Object> updateRental(@PathVariable Long id, @Valid @ModelAttribute CreateRentalDTO createRentalDTO) {
-		Rental rental = rentalService.checkOwner(id);
-		rentalService.UpdateRental(rental, createRentalDTO);
+	public ResponseEntity<Map<String, String>> updateRental(@PathVariable Long id, @Valid @ModelAttribute CreateRentalDTO createRentalDTO) {
+		RentalEntity rentalEntity = rentalService.checkOwner(id);
+		rentalService.UpdateRental(rentalEntity, createRentalDTO);
 		return ResponseEntity.ok().body(Map.of("message", RENTAL_UPDATED));
 	}
 }

@@ -2,9 +2,9 @@ package fr.matthieu.chatop.service;
 
 import fr.matthieu.chatop.dto.CreateMessageDTO;
 import fr.matthieu.chatop.exception.UnauthorizedException;
-import fr.matthieu.chatop.model.Message;
-import fr.matthieu.chatop.model.Rental;
-import fr.matthieu.chatop.model.User;
+import fr.matthieu.chatop.model.MessageEntity;
+import fr.matthieu.chatop.model.RentalEntity;
+import fr.matthieu.chatop.model.UserEntity;
 import fr.matthieu.chatop.repository.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,20 +45,20 @@ public class MessageService {
 	 */
 	@Transactional
 	public void createMessage(CreateMessageDTO createMessageDTO) {
-		User user = userService.getAuthenticateUser();
+		UserEntity userEntity = userService.getAuthenticateUser();
 
-		if(!(Objects.equals(user.getId(), createMessageDTO.user_id()))) {
+		if(!(Objects.equals(userEntity.getId(), createMessageDTO.user_id()))) {
 			throw new UnauthorizedException(UNAUTHORIZED_ACCESS);
 		}
 
-		Rental rental = rentalService.getRentalById(createMessageDTO.rental_id());
+		RentalEntity rentalEntity = rentalService.getRentalById(createMessageDTO.rental_id());
 
-		Message message = new Message(
+		MessageEntity messageEntity = new MessageEntity(
 				createMessageDTO.message(),
-				user,
-				rental
+				userEntity,
+				rentalEntity
 		);
 
-		messageRepository.save(message);
+		messageRepository.save(messageEntity);
 	}
 }

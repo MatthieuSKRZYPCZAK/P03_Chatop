@@ -5,7 +5,7 @@ import fr.matthieu.chatop.dto.AuthenticationDTO;
 import fr.matthieu.chatop.dto.RegisterDTO;
 import fr.matthieu.chatop.dto.UserDTO;
 import fr.matthieu.chatop.common.ErrorResponse;
-import fr.matthieu.chatop.model.User;
+import fr.matthieu.chatop.model.UserEntity;
 import fr.matthieu.chatop.service.JWTService;
 import fr.matthieu.chatop.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,9 +17,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -72,17 +74,22 @@ public class AuthController {
 					)
 			}
 	)
-	public ResponseEntity<Object> login(@RequestBody AuthenticationDTO authenticationDTO) {
-		Authentication authentication = authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(authenticationDTO.email(), authenticationDTO.password())
-		);
-		if (authentication.isAuthenticated()) {
-			User user = (User) authentication.getPrincipal();
-			userService.incrementTokenVersion(user);
-			String token = jwtService.generate(user);
-			return ResponseEntity.ok().body(Map.of("token", token));
-		} else {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(ResponseMessages.INVALID_CREDENTIALS));
+	public ResponseEntity<?> login(@RequestBody AuthenticationDTO authenticationDTO) {
+		try {
+			Authentication authentication = authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(authenticationDTO.email(), authenticationDTO.password())
+			);
+			if (authentication.isAuthenticated()) {
+				UserEntity userEntity = (UserEntity) authentication.getPrincipal();
+				userService.incrementTokenVersion(userEntity);
+				String token = jwtService.generate(userEntity);
+				return ResponseEntity.ok().body(Map.of("token", token));
+			} else {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(ResponseMessages.INVALID_CREDENTIALS));
+			}
+		} catch (InternalAuthenticationServiceException e) {
+			log.warn("Internal authentication failed - {}", e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(ResponseMessages.SERVICE_UNAVAILABLE));
 		}
 	}
 
@@ -110,13 +117,19 @@ public class AuthController {
 					)
 			}
 	)
-	public ResponseEntity<Object> register(@Valid @RequestBody RegisterDTO registerDTO) {
-		String token = userService.register(registerDTO);
+	public ResponseEntity<?> register(@Valid @RequestBody RegisterDTO registerDTO) {
+		try {
+			String token = userService.register(registerDTO);
 
-		if(token != null) {
-			return  ResponseEntity.ok(Map.of("token", token));
-		} else {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(ResponseMessages.REGISTER_FAILED));
+			if(token != null) {
+				return  ResponseEntity.ok(Map.of("token", token));
+			} else {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(ResponseMessages.REGISTER_FAILED));
+			}
+
+		} catch (DataAccessResourceFailureException e) {
+		log.warn("DataAccessResourceFailure Exception : {}", e.getMessage());
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(ResponseMessages.SERVICE_UNAVAILABLE));
 		}
 	}
 
@@ -144,13 +157,7 @@ public class AuthController {
 					)
 			}
 	)
-	public ResponseEntity<Object> getUser() {
-		User user = userService.getAuthenticateUser();
-		if(user != null) {
-			UserDTO userDTO = userService.getUserResponseDTO();
-			return ResponseEntity.ok().body(userDTO);
-		} else {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(ResponseMessages.UNAUTHORIZED_ACCESS));
-		}
+	public ResponseEntity<UserDTO> getUser() {
+		return ResponseEntity.ok().body(userService.getUserResponseDTO());
 	}
 }
