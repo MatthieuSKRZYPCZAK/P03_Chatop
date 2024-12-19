@@ -6,9 +6,6 @@ package fr.matthieu.chatop.common;
  */
 public class ApiRoutes {
 
-
-	public static final String APP_URL = "http://localhost:";
-
 	public static final String BASE_URL = "/api";
 
 
