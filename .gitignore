@@ -12,6 +12,9 @@ uploads/
 !uploads/rentals/example4.jpg
 !uploads/rentals/example5.jpg
 
+### SQL ###
+data.sql
+
 ### STS ###
 .apt_generated
 .classpath
@@ -41,3 +44,5 @@ build/
 .vscode/
 
 .env
+
+
