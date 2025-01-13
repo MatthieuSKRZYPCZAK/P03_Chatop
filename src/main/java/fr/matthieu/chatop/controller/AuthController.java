@@ -74,7 +74,7 @@ public class AuthController {
 					)
 			}
 	)
-	public ResponseEntity<?> login(@RequestBody AuthenticationDTO authenticationDTO) {
+	public ResponseEntity<Map<String, String>> login(@RequestBody AuthenticationDTO authenticationDTO) {
 		try {
 			Authentication authentication = authenticationManager.authenticate(
 					new UsernamePasswordAuthenticationToken(authenticationDTO.email(), authenticationDTO.password())
@@ -85,11 +85,11 @@ public class AuthController {
 				String token = jwtService.generate(userEntity);
 				return ResponseEntity.ok().body(Map.of("token", token));
 			} else {
-				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(ResponseMessages.INVALID_CREDENTIALS));
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", ResponseMessages.INVALID_CREDENTIALS));
 			}
 		} catch (InternalAuthenticationServiceException e) {
 			log.warn("Internal authentication failed - {}", e.getMessage());
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(ResponseMessages.SERVICE_UNAVAILABLE));
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", ResponseMessages.SERVICE_UNAVAILABLE));
 		}
 	}
 
@@ -117,19 +117,19 @@ public class AuthController {
 					)
 			}
 	)
-	public ResponseEntity<?> register(@Valid @RequestBody RegisterDTO registerDTO) {
+	public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterDTO registerDTO) {
 		try {
 			String token = userService.register(registerDTO);
 
 			if(token != null) {
 				return  ResponseEntity.ok(Map.of("token", token));
 			} else {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(ResponseMessages.REGISTER_FAILED));
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ResponseMessages.REGISTER_FAILED));
 			}
 
 		} catch (DataAccessResourceFailureException e) {
 		log.warn("DataAccessResourceFailure Exception : {}", e.getMessage());
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(ResponseMessages.SERVICE_UNAVAILABLE));
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", ResponseMessages.SERVICE_UNAVAILABLE));
 		}
 	}
 
