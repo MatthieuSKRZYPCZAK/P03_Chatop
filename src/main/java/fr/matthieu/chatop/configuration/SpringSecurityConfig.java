@@ -2,6 +2,7 @@ package fr.matthieu.chatop.configuration;
 
 import fr.matthieu.chatop.filter.GlobalExceptionFilter;
 import fr.matthieu.chatop.filter.JwtAuthFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -32,6 +33,9 @@ public class SpringSecurityConfig {
 	private final JwtAuthFilter jwtAuthFilter;
 	private final GlobalExceptionFilter globalExceptionFilter;
 
+	@Value("${file.upload-relative-path}")
+	private String uploadRelativePath;
+
 	public SpringSecurityConfig(BCryptPasswordEncoder passwordEncoder, JwtAuthFilter jwtAuthFilter, GlobalExceptionFilter globalExceptionFilter) {
 		this.passwordEncoder = passwordEncoder;
 		this.jwtAuthFilter = jwtAuthFilter;
@@ -47,11 +51,13 @@ public class SpringSecurityConfig {
 						.requestMatchers(
 								REGISTER_URL,
 								LOGIN_URL,
-								"/uploads/**",
+								uploadRelativePath+"/**",
 								API_DOCS_URL+"/**",
 								SWAGGER_UI_URL+"/**"
-								).permitAll()
-						.anyRequest().authenticated());
+								)
+						.permitAll()
+						.anyRequest()
+						.authenticated());
 		http.addFilterBefore(globalExceptionFilter, UsernamePasswordAuthenticationFilter.class);
 		http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 		return http.build();
